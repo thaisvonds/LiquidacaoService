@@ -2,6 +2,7 @@ using LiquidacaoService.API.Data;
 using LiquidacaoService.API.Repositories;
 using LiquidacaoService.API.Services;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,7 +36,9 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 }
+
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
