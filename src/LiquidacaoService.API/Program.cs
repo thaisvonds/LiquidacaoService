@@ -19,8 +19,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Repositórios e Services
 builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 builder.Services.AddScoped<IClienteService, ClienteService>();
+builder.Services.AddScoped<IAtivoRepository, AtivoRepository>();
+builder.Services.AddScoped<IAtivoService, AtivoService>();
 
 var app = builder.Build();
+
+// Seeding de dados iniciais
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await DataSeeder.SeedAsync(context);
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
