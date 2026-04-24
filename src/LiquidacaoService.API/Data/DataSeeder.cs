@@ -14,22 +14,34 @@ public static class DataSeeder
         await context.SaveChangesAsync();
     }
 
-    private static async Task SeedAtivos(AppDbContext context)
+   private static async Task SeedAtivos(AppDbContext context)
+{
+    var codigosDesejados = new List<string> { "PETR4", "VALE3", "ITUB4", "BBAS3", "MXRF11", "HGLG11", "TESOURO-SELIC" };
+    
+    // Pega o que já existe no banco para não duplicar
+    var ativosExistentes = await context.Ativos
+        .Where(a => codigosDesejados.Contains(a.Codigo))
+        .Select(a => a.Codigo)
+        .ToListAsync();
+
+    var novosAtivos = new List<Ativo>();
+
+    // Só adiciona se o código não estiver no banco
+    if (!ativosExistentes.Contains("PETR4"))
+        novosAtivos.Add(new() { Id = Guid.NewGuid(), Codigo = "PETR4", Descricao = "Petrobras PN", Tipo = TipoAtivo.RendaVariavel, PrazoLiquidacao = 2 });
+    
+    if (!ativosExistentes.Contains("VALE3"))
+        novosAtivos.Add(new() { Id = Guid.NewGuid(), Codigo = "VALE3", Descricao = "Vale S.A. ON", Tipo = TipoAtivo.RendaVariavel, PrazoLiquidacao = 2 });
+    
+    if (!ativosExistentes.Contains("ITUB4"))
+        novosAtivos.Add(new() { Id = Guid.NewGuid(), Codigo = "ITUB4", Descricao = "Itaú Unibanco PN", Tipo = TipoAtivo.RendaVariavel, PrazoLiquidacao = 2 });
+
+
+    if (novosAtivos.Any())
     {
-        if (await context.Ativos.AnyAsync()) return;
-
-        var ativos = new List<Ativo>
-        {
-            new() { Id = Guid.NewGuid(), Codigo = "PETR4", Descricao = "Petrobras PN", Tipo = TipoAtivo.RendaVariavel, PrazoLiquidacao = 2 },
-            new() { Id = Guid.NewGuid(), Codigo = "BBAS3", Descricao = "Banco do Brasil ON", Tipo = TipoAtivo.RendaVariavel, PrazoLiquidacao = 2 },
-            new() { Id = Guid.NewGuid(), Codigo = "MXRF11", Descricao = "Maxi Renda FII", Tipo = TipoAtivo.RendaVariavel, PrazoLiquidacao = 2 },
-            new() { Id = Guid.NewGuid(), Codigo = "HGLG11", Descricao = "CSHG Logística FII", Tipo = TipoAtivo.RendaVariavel, PrazoLiquidacao = 2 },
-            new() { Id = Guid.NewGuid(), Codigo = "TESOURO-SELIC", Descricao = "Tesouro Selic 2029", Tipo = TipoAtivo.RendaFixa, PrazoLiquidacao = 1 },
-            new() { Id = Guid.NewGuid(), Codigo = "TESOURO-IPCA", Descricao = "Tesouro IPCA+ 2035", Tipo = TipoAtivo.RendaFixa, PrazoLiquidacao = 1 },
-        };
-
-        await context.Ativos.AddRangeAsync(ativos);
+        await context.Ativos.AddRangeAsync(novosAtivos);
     }
+}
 
     private static async Task SeedClientes(AppDbContext context)
     {

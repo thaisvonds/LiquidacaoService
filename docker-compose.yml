@@ -1,4 +1,5 @@
 services:
+  # O seu banco de dados (ajustado para manter sua configuração)
   postgres:
     image: postgres:16
     container_name: liquidacao_db
@@ -7,9 +8,30 @@ services:
       POSTGRES_PASSWORD: liquidacao_pass
       POSTGRES_DB: liquidacao_db
     ports:
-      - "5433:5432"
+      - "5433:5432" # Mantém o acesso externo pela porta 5433
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U liquidacao_user -d liquidacao_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # A sua API .NET (Adicionada agora)
+  api:
+    build:
+      context: .
+      dockerfile: src/LiquidacaoService.API/Dockerfile
+    container_name: liquidacao_api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # A mágica acontece aqui: trocamos localhost por 'postgres' (o nome do serviço acima)
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=liquidacao_db;Username=liquidacao_user;Password=liquidacao_pass
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:
